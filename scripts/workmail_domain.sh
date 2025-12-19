@@ -4,19 +4,25 @@ set -e
 # Read JSON from stdin
 eval "$(jq -r '@sh "ORG_ID=\(.org_id) DOMAIN=\(.domain) REGION=\(.region) PROFILE=\(.profile)"')"
 
+# Build profile argument only if profile is set and not empty
+PROFILE_ARG=""
+if [ -n "$PROFILE" ] && [ "$PROFILE" != "null" ]; then
+  PROFILE_ARG="--profile $PROFILE"
+fi
+
 # 1. Register Domain (Idempotent: ignore error if already exists)
 aws workmail register-mail-domain \
   --organization-id "$ORG_ID" \
   --domain-name "$DOMAIN" \
   --region "$REGION" \
-  --profile "$PROFILE" 2>/dev/null || true
+  $PROFILE_ARG 2>/dev/null || true
 
 # 2. Get Domain Details
 DETAILS=$(aws workmail get-mail-domain \
   --organization-id "$ORG_ID" \
   --domain-name "$DOMAIN" \
   --region "$REGION" \
-  --profile "$PROFILE")
+  $PROFILE_ARG)
 
 # 3. Extract Records - Get FIRST of each type for core verification
 # TXT Record for Verification (first one is the ownership verification)

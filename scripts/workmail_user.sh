@@ -8,6 +8,12 @@ REGION=$4
 PROFILE=$5
 DOMAIN=$6
 
+# Build profile argument only if profile is set and not empty
+PROFILE_ARG=""
+if [ -n "$PROFILE" ] && [ "$PROFILE" != "null" ]; then
+  PROFILE_ARG="--profile $PROFILE"
+fi
+
 # =============================================================================
 # Wait for Domain Verification (MX record propagation)
 # =============================================================================
@@ -20,7 +26,7 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
     --organization-id "$ORG_ID" \
     --domain-name "$DOMAIN" \
     --region "$REGION" \
-    --profile "$PROFILE" \
+    $PROFILE_ARG \
     --query "IsDefault" \
     --output text 2>/dev/null || echo "PENDING")
   
@@ -29,7 +35,7 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
     --organization-id "$ORG_ID" \
     --domain-name "$DOMAIN" \
     --region "$REGION" \
-    --profile "$PROFILE" \
+    $PROFILE_ARG \
     --query "OwnershipVerificationStatus" \
     --output text 2>/dev/null || echo "PENDING")
   
@@ -53,7 +59,7 @@ fi
 USER_INFO=$(aws workmail list-users \
   --organization-id "$ORG_ID" \
   --region "$REGION" \
-  --profile "$PROFILE" \
+  $PROFILE_ARG \
   --query "Users[?Name=='$USERNAME'].[Id,State]" \
   --output text)
 
@@ -76,7 +82,7 @@ if [ "$USER_ID" == "None" ] || [ -z "$USER_ID" ]; then
     --display-name "$USERNAME" \
     --password "$PASSWORD" \
     --region "$REGION" \
-    --profile "$PROFILE" \
+    $PROFILE_ARG \
     --query "UserId" \
     --output text)
   USER_STATE="DISABLED"
@@ -104,7 +110,7 @@ if [ "$USER_STATE" == "DISABLED" ]; then
       --entity-id "$USER_ID" \
       --email "$EMAIL" \
       --region "$REGION" \
-      --profile "$PROFILE" 2>&1; then
+      $PROFILE_ARG 2>&1; then
       REGISTER_SUCCESS=true
       echo "User registered successfully!" >&2
       break
