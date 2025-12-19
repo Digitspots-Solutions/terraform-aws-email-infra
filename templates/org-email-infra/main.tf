@@ -51,7 +51,7 @@ variable "workmail_passwords" {
 # EXAMPLE DOMAIN - Copy and modify this block for each new domain
 # -----------------------------------------------------------------------------
 # module "example_domain" {
-#   source = "git::https://github.com/Digitspots-Solutions/terraform-aws-email-infra.git?ref=v1.0.0"
+#   source = "git::https://github.com/Digitspots-Solutions/terraform-aws-email-infra.git?ref=v1.0.1"
 #
 #   domain_name       = "example.com"
 #   workmail_user     = "info"
